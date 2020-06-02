@@ -1,10 +1,21 @@
 .PHONY: all clean
 
-all: data/raw/data-simplification.tar.bz2
+all: data
 
 clean:
 	rm -rf data/raw/*
 	touch data/raw/.gitkeep
 
+data: wiki glove
+
+wiki: data/raw/data-simplification.tar.bz2
+
+glove: data/raw/glove.6B.zip
+
 data/raw/data-simplification.tar.bz2:
-	python cleartext/utils/datasets.py data/ $@
+	wget -N -c -P data/raw/ https://raw.githubusercontent.com/louismartin/dress-data/master/data-simplification.tar.bz2
+	tar -xvjf data/raw/data-simplification.tar.bz2 -C data/raw
+
+data/raw/glove.6B.zip:
+	wget -N -c -P data/raw/ http://nlp.stanford.edu/data/glove.6B.zip
+	unzip data/raw/glove.6B.zip -d data/raw
