@@ -1,24 +1,30 @@
+import click
 import io
 import os
-
-import tensorflow as tf
-
-
-github_url = 'https://raw.githubusercontent.com/louismartin/dress-data/master/data-simplification.tar.bz2'
-_, file_name = os.path.split(github_url)
-
-data_dir = '../../data'
+import requests
+import tarfile
 
 
-def load_wiki(dataset='wikismall'):
-    zip_path = tf.keras.utils.get_file(file_name, github_url, extract=True, cache_dir='../../')
-    zip_dir = os.path.dirname(zip_path)
-    wiki_dir = os.path.join(zip_dir, 'data-simplification', dataset)
+@click.command()
+@click.argument('data_dir', type=click.Path())
+def download_wiki(data_dir):
+    github_url = 'https://raw.githubusercontent.com/louismartin/dress-data/master/data-simplification.tar.bz2'
+    _, file_name = os.path.split(github_url)
+    file_path = os.path.join(data_dir, 'raw', file_name)
+
+    r = requests.get(github_url)
+    with open(file_path, 'wb') as f:
+        f.write(r.content)
+
+    tar = tarfile.open(file_path)
+    tar.extractall(os.path.join(data_dir, 'raw'))
+    tar.close()
+
+
+def load_wiki(dataset='wikismall', data_dir='../../data', keep_splits=False):
+    wiki_dir = os.path.join(data_dir, 'raw/data-simplification', dataset)
 
     prefix = 'PWKP_108016.tag.80.aner.ori' if dataset == 'wikismall' else 'wiki.full.aner.ori'
-    file_path = '.'.join([prefix, 'test', 'src'])
-    io.open(os.path.join(wiki_dir, file_path))
-
     data = []
     for split in ['train', 'valid', 'test']:
         for loc in ['src', 'dst']:
@@ -28,5 +34,15 @@ def load_wiki(dataset='wikismall'):
             lines = stream.read().split('\n')
             data.append(lines)
 
-    # returns src_train, dst_train, src_valid, dst_valid, src_test, dst_test
-    return data
+    if keep_splits:
+        return data
+    
+    src_train, dst_train, src_valid, dst_valid, src_test, dst_test = data
+    src = src_train + src_valid + src_test
+    dst = dst_train + dst_valid + dst_test
+    return src, dst
+
+
+if __name__ == '__main__':
+    download_wiki()
+    download_wiki()

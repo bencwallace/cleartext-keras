@@ -1,19 +1,4 @@
-name: insight
-channels:
-  - defaults
 dependencies:
   - python=3
-  - h5py
-  - scipy
-  - numpy
-  - pandas
-  - flask
-  - scikit-learn
-  - jupyter
-  - matplotlib
   - tensorflow
-  - cpuonly
-  - torchvision
-  - pytorch
-prefix: /home/ben/anaconda3/envs/insight
-
+  - jupyter
