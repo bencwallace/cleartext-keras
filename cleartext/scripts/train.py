@@ -37,6 +37,8 @@ def train(dataset='wikismall', vocab_size=10000, embed_dim=50, units=32, train_f
     target = list(train['target'])
     model.fit([source, target], target, batch_size=32, verbose=2)
 
+    return model
+
 
 if __name__ == '__main__':
     train(*sys.argv[1:])
