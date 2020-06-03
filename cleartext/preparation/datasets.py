@@ -1,14 +1,14 @@
 import io
 import os
 
-import dotenv
 import pandas as pd
+
+from ..utils import get_proj_root
 
 
 def load_wiki(dataset='wikismall', keep_splits=False):
-    dotenv.load_dotenv()
-    proj_dir = os.getenv('PROJECT_DIR')
-    wiki_dir = os.path.join(proj_dir, 'data/raw/data-simplification', dataset)
+    proj_root = get_proj_root()
+    wiki_dir = os.path.join(proj_root, 'data/raw/data-simplification', dataset)
 
     prefix = 'PWKP_108016.tag.80.aner.ori' if dataset == 'wikismall' else 'wiki.full.aner.ori'
     data = []
@@ -29,3 +29,7 @@ def load_wiki(dataset='wikismall', keep_splits=False):
         return train, valid, test
 
     return pd.concat([train, valid, test])
+
+
+if __name__ == '__main__':
+    test()

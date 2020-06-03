@@ -1,7 +1,8 @@
 import os
 
-import dotenv
 import numpy as np
+
+from ..utils import get_proj_root
 
 
 def build_embed_matrix(embed_vectors, tokenizer):
@@ -22,9 +23,8 @@ def build_embed_matrix(embed_vectors, tokenizer):
 
 
 def load_glove(dim):
-    dotenv.load_dotenv()
-    proj_dir = os.getenv('PROJECT_DIR')
-    glove_dir = os.path.join(proj_dir, 'data/raw/')
+    proj_root = get_proj_root()
+    glove_dir = os.path.join(proj_root, 'data/raw/')
 
     embed_vectors = dict()
     with open(os.path.join(glove_dir, f'glove.6B.{dim}d.txt')) as f:

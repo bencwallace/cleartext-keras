@@ -7,7 +7,7 @@ from cleartext.models import lstm
 from cleartext.preparation import build_embed_matrix, load_glove, load_wiki, prepare
 
 
-def train(dataset='wikismall', vocab_size=10000, embed_dim=50, units=32, train_frac=0.8):
+def train(epochs, dataset='wikismall', vocab_size=10000, embed_dim=50, units=32, train_frac=0.8):
     print('Loading data')
     data = load_wiki(dataset)
 
@@ -41,4 +41,4 @@ def train(dataset='wikismall', vocab_size=10000, embed_dim=50, units=32, train_f
 
 
 if __name__ == '__main__':
-    train(*sys.argv[1:])
+    train()
