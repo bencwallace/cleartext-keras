@@ -1,4 +1,11 @@
+name: cleartext
+channels:
+  - defaults
 dependencies:
   - python=3
   - tensorflow
   - jupyter
+  - pandas
+  - python-dotenv
+prefix: /home/ben/anaconda3/envs/cleartext
+
