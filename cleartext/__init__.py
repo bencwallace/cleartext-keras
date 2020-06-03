@@ -1,1 +1,1 @@
-from .utils import load_wiki
+from .scripts import train

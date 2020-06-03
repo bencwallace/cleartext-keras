@@ -5,5 +5,6 @@ def preprocess(sentence):
     return f'<START> {sentence} <END>'
 
 
-def pad(sequence):
+# todo: preprocess, tokenize, pad
+def prepare():
     pass
