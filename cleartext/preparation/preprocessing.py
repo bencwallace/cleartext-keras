@@ -6,10 +6,15 @@ from tensorflow.keras.preprocessing import sequence
 
 def clean(sentence):
     sentence = unicodedata.normalize('NFC', sentence)
-    sentece = sentence.lower()
-    sentence = re.sub(r'([?.!])', r' \1 ', sentence)
-    sentence = re.sub('\s{2,}', ' ', sentence)
-    sentence = sentence.strip()
+    sentence = sentence.lower()
+
+    # keep only alphanumeric and some punctuation
+    pattern_keep = re.compile('A-Za-z0-9.!?,')
+    sentence = pattern_keep.sub(' ', sentence)
+
+    # add space around punctuation
+    sentence = re.sub(r'([.!?,])', r' \1 ', sentence)
+
     return f'<START> {sentence} <END>'
 
 

@@ -6,7 +6,7 @@ import pandas as pd
 from ..utils import get_proj_root
 
 
-def load_wiki(num_examples, dataset):
+def load_wiki(num_examples=50_000, dataset='wikismall'):
     proj_root = get_proj_root()
     wiki_dir = os.path.join(proj_root, 'data/raw/data-simplification', dataset)
 
@@ -29,7 +29,3 @@ def load_wiki(num_examples, dataset):
     if num_examples == 'all':
         return data
     return data[:num_examples]
-
-
-if __name__ == '__main__':
-    test()
