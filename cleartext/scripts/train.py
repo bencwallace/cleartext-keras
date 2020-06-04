@@ -27,8 +27,8 @@ class Trainer(object):
         # data = data.sample(frac=1)
 
         # create array
-        source_array = np.array(data['source'].tolist())
-        target_array = np.array(data['target'].tolist())
+        source_array = np.array(data['source'].tolist(), dtype='int32')
+        target_array = np.array(data['target'].tolist(), dtype='int32')
         tokens_array = np.stack([source_array, target_array])
 
         # split
@@ -92,5 +92,13 @@ class GRUTrainer(Trainer):
                        batch_size=batch_size,
                        epochs=epochs,
                        verbose=verbose,
-                       validation_split=validation_split,
+                       # validation_split=validation_split,
                        callbacks=self.callbacks)
+
+
+if __name__ == '__main__':
+    trainer = GRUTrainer()
+    trainer.load_data(num_examples=100)
+    trainer.load_embedding(50)
+    trainer.build_model(100)
+    trainer.train(1)

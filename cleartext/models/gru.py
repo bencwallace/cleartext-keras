@@ -47,10 +47,12 @@ class Decoder(tf.keras.Model):
         inputs, enc_state = inputs
 
         if training:
+            print('Training is true')
             x = self.embed(inputs)
             out, _ = self.gru(x, initial_state=enc_state)
             out = tf.reshape(out, (-1, out.shape[2]))
             out = self.fc(out)
             return out
-
-        raise NotImplementedError
+        else:
+            print('Training is false')
+            raise NotImplementedError
