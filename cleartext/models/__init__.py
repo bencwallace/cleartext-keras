@@ -1,3 +1,3 @@
-from .lstm import lstm
+from .lstm import build_lstm
 
 __all__ = ['lstm']

@@ -7,7 +7,7 @@ import numpy as np
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.preprocessing import text
 
-from ..models import lstm
+from ..models import build_lstm
 from ..preparation import load_embedding, load_data, prepare
 from ..utils import get_proj_root
 
