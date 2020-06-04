@@ -6,7 +6,7 @@ import pandas as pd
 from ..utils import get_proj_root
 
 
-def load_wiki(dataset='wikismall', keep_splits=False):
+def load_wiki(num_examples, dataset):
     proj_root = get_proj_root()
     wiki_dir = os.path.join(proj_root, 'data/raw/data-simplification', dataset)
 
@@ -25,10 +25,10 @@ def load_wiki(dataset='wikismall', keep_splits=False):
     valid = pd.DataFrame(zip(src_valid, dst_valid), columns=['source', 'target'])
     test = pd.DataFrame(zip(src_test, dst_test), columns=['source', 'target'])
 
-    if keep_splits:
-        return train, valid, test
-
-    return pd.concat([train, valid, test])
+    data = pd.concat([train, valid, test])
+    if num_examples == 'all':
+        return data
+    return data[:num_examples]
 
 
 if __name__ == '__main__':

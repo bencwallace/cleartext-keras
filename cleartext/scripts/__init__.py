@@ -1,3 +1,3 @@
-from .train import train
+from .train import train, load_static
 
-__all__ = ['train']
+__all__ = ['train', 'load_static']

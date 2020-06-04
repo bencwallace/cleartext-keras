@@ -4,7 +4,7 @@ import unicodedata
 from tensorflow.keras.preprocessing import sequence
 
 
-def preprocess(sentence):
+def clean(sentence):
     sentence = unicodedata.normalize('NFC', sentence)
     sentece = sentence.lower()
     sentence = re.sub(r'([?.!])', r' \1 ', sentence)
@@ -14,8 +14,8 @@ def preprocess(sentence):
 
 
 def prepare(df, tokenizer, pad=True):
-    # preprocess
-    df = df.applymap(preprocess)
+    # clean
+    df = df.applymap(clean)
 
     # tokenize
     tokenizer.fit_on_texts(df['source'])
