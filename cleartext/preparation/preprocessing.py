@@ -27,8 +27,9 @@ def prepare(df, tokenizer, pad=True):
     df = df.apply(lambda col: tokenizer.texts_to_sequences(col), axis=0)
 
     # pad
+    max_len = None
     if pad:
         max_len = max(df.applymap(len).max(axis=0))
         df = df.applymap(lambda x: sequence.pad_sequences([x], maxlen=max_len, padding='post')[0])
 
-    return df
+    return df, max_len

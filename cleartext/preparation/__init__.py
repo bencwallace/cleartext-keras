@@ -1,5 +1,5 @@
-from .datasets import load_wiki
-from .embeddings import build_embed_matrix, load_glove
+from .datasets import load_data
+from .embeddings import load_embedding
 from .preprocessing import prepare
 
-__all__ = ['build_embed_matrix', 'load_glove', 'load_wiki', 'prepare']
+__all__ = ['load_data', 'load_embedding', 'prepare']

@@ -2,7 +2,7 @@ import tensorflow as tf
 import tensorflow.keras.layers as layers
 
 
-def lstm(vocab_size, seq_len, units, weights=None):
+def lstm(vocab_size, seq_len, units, weights=None, dropout=0.5):
     # shared embedding layer
     embed = layers.Embedding(vocab_size,
                              weights.shape[1],
@@ -22,6 +22,7 @@ def lstm(vocab_size, seq_len, units, weights=None):
     dec_embed = embed(dec_in)
     dec_lstm = layers.LSTM(units, return_sequences=True, return_state=True)
     dec_out, _, _ = dec_lstm(dec_embed, initial_state=[enc_hidden, enc_cell])
+    dec_out = layers.Dropout(0.5)(dec_out)
 
     # output
     out = layers.Dense(vocab_size, activation='softmax')(dec_out)
