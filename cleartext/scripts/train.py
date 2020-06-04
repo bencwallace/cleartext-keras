@@ -46,7 +46,7 @@ def load_static(num_examples=1000,
     return train, test, embed_matrix
 
 
-def train(epochs=10,
+def train_lstm(epochs=10,
           batch_size=32,
           num_examples=1000,
           dataset='wikismall',
