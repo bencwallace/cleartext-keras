@@ -46,8 +46,8 @@ class Decoder(tf.keras.Model):
         # inputs is target word (None if not training) and encoder state
         inputs, enc_state = inputs
 
+        # todo: fix this
         # if training:
-        print('Training is true')
         x = self.embed(inputs)
         out, _ = self.gru(x, initial_state=enc_state)
         out = tf.reshape(out, (-1, out.shape[2]))
