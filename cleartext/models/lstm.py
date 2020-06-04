@@ -30,12 +30,5 @@ def build_lstm(vocab_size, seq_len, units, weights=None, rec_dropout=0.2):
 
     # model
     training_model = tf.keras.Model(inputs=[enc_in, dec_in], outputs=out)
-    
-    # build inference model
-    # todo: accept one-hot vectors instead
-    # infer_enc_in = layers.Input(shape=(None,), dtype='int32')
-    # infer_enc_embed = embed(infer_enc_in)    
-    # inference_model = None
 
-    # return training_model, inference_model
     return training_model

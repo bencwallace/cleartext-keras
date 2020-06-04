@@ -8,7 +8,7 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.preprocessing import text
 
 from ..models import build_lstm
-from ..models.gru import EncoderDecoder
+from ..models.gru import build_gru
 from ..preparation import load_embedding, load_data, prepare
 from ..utils import get_proj_root
 
@@ -82,7 +82,7 @@ class GRUTrainer(Trainer):
 
     def build_model(self, units):
         self.units = units
-        self.model = EncoderDecoder(self.vocab_size + 1, self.embed_matrix, units, self.seq_len)
+        self.model, self.enc_model, self.dec_model = build_gru(self.vocab_size + 1, self.seq_len, units, self.embed_matrix)
         self.model.compile(optimizer='adam', loss='sparse_categorical_crossentropy')
 
     def train(self, epochs, batch_size=32, verbose=1, validation_split=0.1):
