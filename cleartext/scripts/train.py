@@ -92,7 +92,7 @@ class GRUTrainer(Trainer):
                        batch_size=batch_size,
                        epochs=epochs,
                        verbose=verbose,
-                       # validation_split=validation_split,
+                       validation_split=validation_split,
                        callbacks=self.callbacks)
 
 
