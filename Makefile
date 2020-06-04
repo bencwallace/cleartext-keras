@@ -8,14 +8,12 @@ clean:
 
 data: wiki glove
 
-wiki: data/raw/data-simplification.tar.bz2
-
-glove: data/raw/glove.6B.zip
-
-data/raw/data-simplification.tar.bz2:
+wiki:
 	wget -N -c -P data/raw/ https://raw.githubusercontent.com/louismartin/dress-data/master/data-simplification.tar.bz2
 	tar -xvjf data/raw/data-simplification.tar.bz2 -C data/raw
+	rm data/raw/data-simplification.tar.bz2
 
-data/raw/glove.6B.zip:
+glove:
 	wget -N -c -P data/raw/ http://nlp.stanford.edu/data/glove.6B.zip
 	unzip data/raw/glove.6B.zip -d data/raw
+	rm data/raw/glove.6B.zip
