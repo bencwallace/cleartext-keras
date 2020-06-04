@@ -14,6 +14,6 @@ wiki:
 	rm data/raw/data-simplification.tar.bz2
 
 glove:
-	wget -N -c -P data/raw/ http://nlp.stanford.edu/data/glove.6B.zip
-	unzip data/raw/glove.6B.zip -d data/raw
-	rm data/raw/glove.6B.zip
+	wget -N -c -P models/glove/ http://nlp.stanford.edu/data/glove.6B.zip
+	unzip models/glove/glove.6B.zip -d models/glove/
+	rm models/glove/glove.6B.zip
