@@ -13,12 +13,12 @@ from ..utils import get_proj_root
 
 
 class LSTMTrainer(object):
-    def load_data(self, vocab_size, dataset='wikilarge', train_frac=0.9, num_examples='all'):
+    def load_data(self, vocab_size=10_000, dataset='wikismall', train_frac=0.9, num_examples='all'):
         self.vocab_size = vocab_size
         data = load_data(dataset, num_examples)
         
         # tokenize
-        self.tokenizer = text.Tokenizer(num_words=vocab_size, oov_token='<UNK>')
+        self.tokenizer = text.Tokenizer(num_words=vocab_size, oov_token='<UNK>', filters='')
         data, self.seq_len = prepare(data, self.tokenizer, pad=True)
 
         # shuffle -- todo: turn on when evaluation is set up
@@ -42,11 +42,11 @@ class LSTMTrainer(object):
         self.embed_matrix = load_embedding(dim, self.tokenizer, embedding)
 
     def build_model(self, units, dropout=0.5):
-        self.model = lstm(self.vocab_size + 1, self.seq_len, units, self.embed_matrix)
+        self.model = build_lstm(self.vocab_size + 1, self.seq_len, units, self.embed_matrix)
         self.model.compile(optimizer='adam', loss='sparse_categorical_crossentropy')
         self._setup_callbacks(units)
 
-    def train(self, epochs, batch_size=32, verbose=1, validation_split=0.8):
+    def train(self, epochs, batch_size=32, verbose=1, validation_split=0.1):
         self.model.fit(x=[self.source_in, self.target_in],
                        y=self.target_out,
                        batch_size=batch_size,
