@@ -63,9 +63,9 @@ class GRUPipeline(Pipeline):
     def __init__(self):
         self._name = 'gru'
 
-    def build_model(self, units):
+    def build_model(self, units, dropout=0.2):
         self.units = units
-        self.model, self.enc_model, self.dec_model = build_gru(self.vocab_size + 1, self.seq_len, units, self.embed_matrix)
+        self.model, self.enc_model, self.dec_model = build_gru(self.vocab_size + 1, self.seq_len, units, self.embed_matrix, dropout)
         self.model.compile(optimizer='adam', loss='sparse_categorical_crossentropy')
 
     def train(self, epochs, batch_size=32, verbose=1, validation_split=0.1):
@@ -108,16 +108,15 @@ class GRUPipeline(Pipeline):
         return result
 
 
-    def evaluate(self, max_len=10):
+    def evaluate(self, test_size, max_len=100):
         total_score = 0
-        num_examples = self.test_source.shape[0]
         smoother = SmoothingFunction().method1
-        for i in range(num_examples):
-            print(f'{i} out of {num_examples}')
+        for i in range(test_size):
+            print(f'{i} out of {test_size}')
             candidate = self.predict_seq(self.test_source[i, :].tolist(), max_len)
             reference = self.test_target[i, :]
             total_score += sentence_bleu([reference], candidate, smoothing_function=smoother)
-        return total_score / num_examples
+        return total_score / test_size
 
 
 if __name__ == '__main__':
