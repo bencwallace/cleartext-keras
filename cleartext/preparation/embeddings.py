@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 
-from ..utils import get_proj_root
+from ..utils.utils import get_proj_root
 
 
 def load_embedding(dim, tokenizer, embedding):

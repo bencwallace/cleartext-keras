@@ -3,7 +3,7 @@ import os
 
 import pandas as pd
 
-from ..utils import get_proj_root
+from ..utils.utils import get_proj_root
 
 
 def load_data(dataset, num_examples='all'):

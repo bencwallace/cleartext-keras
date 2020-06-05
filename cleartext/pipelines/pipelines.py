@@ -8,17 +8,18 @@ import tensorflow as tf
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.preprocessing import text
 
-from ..models import build_lstm
 from ..models.gru import build_gru
-from ..preparation import load_embedding, load_data, preprocess
-from ..utils import get_proj_root
+from ..preparation.datasets import load_data
+from ..preparation.embeddings import load_embedding
+from ..preparation.preprocessing import preprocess
+from ..utils.utils import get_proj_root
 
 
 class Pipeline(object):
     def load_data(self, num_examples=10_000, vocab_size=10_000, dataset='wikismall', train_frac=0.9):
         self.vocab_size = vocab_size
         data = load_data(dataset, num_examples)
-        
+
         # tokenize
         self.tokenizer = text.Tokenizer(num_words=vocab_size, oov_token='<unk>', filters='')
         data = preprocess(data, self.tokenizer)
@@ -96,10 +97,10 @@ class GRUPipeline(Pipeline):
 
             next_token = np.argmax(out)
             token_tensor = tf.constant([[next_token]])
-            
+
             # todo: next line causes insane, seemingly non-deterministic complaints about retracing
             output = tf.concat([output, token_tensor], axis=1)
-            
+
             if next_token == self.tokenizer.word_index['<end>']:
                 break
 
