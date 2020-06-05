@@ -98,6 +98,7 @@ class GRUTrainer(Trainer):
                        callbacks=self.callbacks)
 
     # todo: change greedy algorithm to beam search
+    # todo: fix insane, seemingly non-deterministic complaints about retracing
     def predict_seq(self, seq, max_len=200):
         num_padding = self.seq_len - len(seq) - 2
         start_token = self.tokenizer.word_index['<start>']
@@ -106,14 +107,18 @@ class GRUTrainer(Trainer):
         assert len(seq) == self.seq_len
 
         state = self.enc_model.predict([seq])
-        output = tf.convert_to_tensor([[self.tokenizer.word_index['<start>']]])
-        for i in range(max_len):
+        # output = tf.constant([[self.tokenizer.word_index['<start>']]])
+        output = np.array([[self.tokenizer.word_index['<start>']]])
+        for i in tf.range(tf.constant(max_len)):
+            i = tf.constant(i)
             out, state = self.dec_model.predict([output, state])
             next_token = np.argmax(out)
-            token_tensor = tf.convert_to_tensor([[next_token]], dtype=output.dtype)
+            token_tensor = tf.constant([[next_token]])
             output = tf.concat([output, token_tensor], axis=1)
             if next_token == self.tokenizer.word_index['<end>']:
                 break
+
+        return output
 
 
 if __name__ == '__main__':
