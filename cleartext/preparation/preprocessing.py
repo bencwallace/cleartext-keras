@@ -15,21 +15,18 @@ def clean(sentence):
     # add space around punctuation
     sentence = re.sub(r'([.!?,])', r' \1 ', sentence)
 
-    return f'<START> {sentence} <END>'
+    return sentence
 
 
-def prepare(df, tokenizer, pad=True):
+def prepare(df, tokenizer, seq_len='max'):
     # clean
     df = df.applymap(clean)
 
     # tokenize
+    df = df.applymap(lambda s: f'<start> {s} <end>')
     tokenizer.fit_on_texts(df['source'])
     df = df.apply(lambda col: tokenizer.texts_to_sequences(col), axis=0)
 
-    # pad
-    max_len = None
-    if pad:
-        max_len = max(df.applymap(len).max(axis=0))
-        df = df.applymap(lambda x: sequence.pad_sequences([x], maxlen=max_len, padding='post')[0])
-
-    return df, max_len
+    seq_len = seq_len if type(seq_len) is int else max(df.applymap(len).apply(max))
+    df = df.applymap(lambda x: sequence.pad_sequences([x], padding='post', maxlen=seq_len)[0])
+    return df

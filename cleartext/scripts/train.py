@@ -3,6 +3,7 @@ import os
 import sys
 
 import numpy as np
+import tensorflow as tf
 
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.preprocessing import text
@@ -19,10 +20,11 @@ class Trainer(object):
         data = load_data(dataset, num_examples)
         
         # tokenize
-        self.tokenizer = text.Tokenizer(num_words=vocab_size, oov_token='<UNK>', filters='')
-        data, self.seq_len = prepare(data, self.tokenizer, pad=True)
+        self.tokenizer = text.Tokenizer(num_words=vocab_size, oov_token='<unk>', filters='')
+        data = prepare(data, self.tokenizer)
+        self.seq_len = len(data['source'].iloc[0])
 
-        # shuffle -- todo: turn on when evaluation is set up
+        # shuffle -- todo
         num_rows = len(data)
         # data = data.sample(frac=1)
 
@@ -95,6 +97,24 @@ class GRUTrainer(Trainer):
                        validation_split=validation_split,
                        callbacks=self.callbacks)
 
+    # todo: change greedy algorithm to beam search
+    def predict_seq(self, seq, max_len=200):
+        num_padding = self.seq_len - len(seq) - 2
+        start_token = self.tokenizer.word_index['<start>']
+        end_token = self.tokenizer.word_index['<end>']
+        seq = [start_token, *seq, end_token, *[0] * num_padding]
+        assert len(seq) == self.seq_len
+
+        state = self.enc_model.predict([seq])
+        output = tf.convert_to_tensor([[self.tokenizer.word_index['<start>']]])
+        for i in range(max_len):
+            out, state = self.dec_model.predict([output, state])
+            next_token = np.argmax(out)
+            token_tensor = tf.convert_to_tensor([[next_token]], dtype=output.dtype)
+            output = tf.concat([output, token_tensor], axis=1)
+            if next_token == self.tokenizer.word_index['<end>']:
+                break
+
 
 if __name__ == '__main__':
     trainer = GRUTrainer()
@@ -102,3 +122,4 @@ if __name__ == '__main__':
     trainer.load_embedding(50)
     trainer.build_model(100)
     trainer.train(1)
+    trainer.predict_seq([11, 21, 31])
