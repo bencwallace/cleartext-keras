@@ -86,25 +86,23 @@ class GRUPipeline(Pipeline):
         # seq = [start_token, *seq, end_token, *[0] * num_padding]
         # assert len(seq) == self.seq_len, f'expected length {self.seq_len} but got {len(seq)}'
         state = self.enc_model.predict([seq])
-        output = tf.constant([[self.tokenizer.word_index['<start>']]])
-        result = [output]
+        token = self.tokenizer.word_index['<start>']
+        output = tf.constant([[token]])
+        result = [token]
 
-        for i in tf.range(tf.constant(max_len)):
-            i = tf.constant(i)
-
+        for _ in tf.range(tf.constant(max_len)):
             # todo: next line is also partly responsible for warning (see next todo)
             out, state = self.dec_model.predict([output, state])
 
-            next_token = np.argmax(out)
-            token_tensor = tf.constant([[next_token]])
+            token = np.argmax(out)
+            output = tf.constant([[token]])
 
             # todo: next line causes insane, seemingly non-deterministic complaints about retracing
             # output = tf.concat([output, token_tensor], axis=1)
 
-            output = token_tensor
-            result.append(output)
+            result.append(token)
 
-            if next_token == self.tokenizer.word_index['<end>']:
+            if token == self.tokenizer.word_index['<end>']:
                 break
 
         return result
@@ -128,5 +126,5 @@ if __name__ == '__main__':
     pipeline.load_embedding(50)
     pipeline.build_model(100)
     pipeline.train(1)
-    print(pipeline.predict_seq([11, 21, 31] + [0] * 39))
-    # print(pipeline.evaluate(300))
+    # print(pipeline.predict_seq([11, 21, 31] + [0] * 39))
+    print(pipeline.evaluate(100))
