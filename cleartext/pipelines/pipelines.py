@@ -5,6 +5,7 @@ import sys
 import numpy as np
 import tensorflow as tf
 
+from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.preprocessing import text
 
@@ -26,7 +27,6 @@ class Pipeline(object):
         self.seq_len = len(data['source'].iloc[0])
 
         # shuffle -- todo
-        num_rows = len(data)
         # data = data.sample(frac=1)
 
         # create array
@@ -35,11 +35,11 @@ class Pipeline(object):
         tokens_array = np.stack([source_array, target_array])
 
         # split
+        num_rows = len(data)
         train_size = int(train_frac * num_rows)
-        train, test = tokens_array[:, :train_size, :], tokens_array[:, train_size:, :]
-        self.source_in = train[0]
-        self.target_in = train[1]
-        self.target_out = self._left_shift(train[1])
+        train, test = tokens_array[:, :train_size, :], tokens_array[:, train_size:, :]        
+        self.train_source, self.train_target = train[0], train[1]
+        self.test_source, self.test_target = test[0], test[1]
 
     def load_embedding(self, dim, embedding='glove'):
         self.embed_dim = dim
@@ -70,8 +70,8 @@ class GRUPipeline(Pipeline):
 
     def train(self, epochs, batch_size=32, verbose=1, validation_split=0.1):
         self._setup_callbacks()
-        self.model.fit(x=[self.source_in, self.target_in],
-                       y=self.target_out,
+        self.model.fit(x=[self.train_source, self.train_target],
+                       y=self._left_shift(self.train_target),
                        batch_size=batch_size,
                        epochs=epochs,
                        verbose=verbose,
@@ -80,40 +80,53 @@ class GRUPipeline(Pipeline):
 
     # todo: change greedy algorithm to beam search
     def predict_seq(self, seq, max_len=100):
-        num_padding = self.seq_len - len(seq) - 2
-        start_token = self.tokenizer.word_index['<start>']
-        end_token = self.tokenizer.word_index['<end>']
-        seq = [start_token, *seq, end_token, *[0] * num_padding]
-        assert len(seq) == self.seq_len
-
+        # num_padding = min(self.seq_len - len(seq) - 2, 0)
+        # start_token = self.tokenizer.word_index['<start>']
+        # end_token = self.tokenizer.word_index['<end>']
+        # seq = [start_token, *seq, end_token, *[0] * num_padding]
+        # assert len(seq) == self.seq_len, f'expected length {self.seq_len} but got {len(seq)}'
         state = self.enc_model.predict([seq])
         output = tf.constant([[self.tokenizer.word_index['<start>']]])
+        result = [output]
 
         for i in tf.range(tf.constant(max_len)):
             i = tf.constant(i)
 
-            # next line is also partly responsible for warning
+            # todo: next line is also partly responsible for warning (see next todo)
             out, state = self.dec_model.predict([output, state])
 
             next_token = np.argmax(out)
             token_tensor = tf.constant([[next_token]])
 
             # todo: next line causes insane, seemingly non-deterministic complaints about retracing
-            output = tf.concat([output, token_tensor], axis=1)
+            # output = tf.concat([output, token_tensor], axis=1)
+
+            output = token_tensor
+            result.append(output)
 
             if next_token == self.tokenizer.word_index['<end>']:
                 break
 
-        return output
+        return result
 
-    def predict(self, text, max_len=100):
-        pass
+
+    def evaluate(self, max_len=10):
+        total_score = 0
+        num_examples = self.test_source.shape[0]
+        smoother = SmoothingFunction().method1
+        for i in range(num_examples):
+            print(f'{i} out of {num_examples}')
+            candidate = self.predict_seq(self.test_source[i, :].tolist(), max_len)
+            reference = self.test_target[i, :]
+            total_score += sentence_bleu([reference], candidate, smoothing_function=smoother)
+        return total_score / num_examples
 
 
 if __name__ == '__main__':
-    trainer = GRUTrainer()
-    trainer.load_data(num_examples=100)
-    trainer.load_embedding(50)
-    trainer.build_model(100)
-    trainer.train(1)
-    trainer.predict_seq([11, 21, 31])
+    pipeline = GRUPipeline()
+    pipeline.load_data(num_examples=100)
+    pipeline.load_embedding(50)
+    pipeline.build_model(100)
+    pipeline.train(1)
+    print(pipeline.predict_seq([11, 21, 31] + [0] * 39))
+    # print(pipeline.evaluate(300))

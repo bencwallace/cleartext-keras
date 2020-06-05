@@ -1,6 +1,8 @@
 import re
 import unicodedata
 
+import pandas as pd
+
 from tensorflow.keras.preprocessing import sequence
 
 
@@ -24,7 +26,7 @@ def preprocess(df, tokenizer, seq_len='max'):
 
     # tokenize
     df = df.applymap(lambda s: f'<start> {s} <end>')
-    tokenizer.fit_on_texts(df['source'])
+    tokenizer.fit_on_texts(pd.concat([df['source'], df['target']]))
     df = df.apply(lambda col: tokenizer.texts_to_sequences(col), axis=0)
 
     seq_len = seq_len if type(seq_len) is int else max(df.applymap(len).apply(max))

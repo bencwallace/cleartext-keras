@@ -17,6 +17,7 @@ def load_wiki(dataset, num_examples):
 
     prefix = 'PWKP_108016.tag.80.aner.ori' if dataset == 'wikismall' else 'wiki.full.aner.ori'
     data = []
+    # todo: optimize
     for split in ['train', 'valid', 'test']:
         for loc in ['src', 'dst']:
             file_name = '.'.join([prefix, split, loc])
