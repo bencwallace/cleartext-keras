@@ -10,18 +10,18 @@ from tensorflow.keras.preprocessing import text
 
 from ..models import build_lstm
 from ..models.gru import build_gru
-from ..preparation import load_embedding, load_data, prepare
+from ..preparation import load_embedding, load_data, preprocess
 from ..utils import get_proj_root
 
 
-class Trainer(object):
-    def load_data(self, vocab_size=10_000, dataset='wikismall', train_frac=0.9, num_examples='all'):
+class Pipeline(object):
+    def load_data(self, num_examples=10_000, vocab_size=10_000, dataset='wikismall', train_frac=0.9):
         self.vocab_size = vocab_size
         data = load_data(dataset, num_examples)
         
         # tokenize
         self.tokenizer = text.Tokenizer(num_words=vocab_size, oov_token='<unk>', filters='')
-        data = prepare(data, self.tokenizer)
+        data = preprocess(data, self.tokenizer)
         self.seq_len = len(data['source'].iloc[0])
 
         # shuffle -- todo
@@ -58,27 +58,7 @@ class Trainer(object):
         ]
 
 
-class LSTMTrainer(Trainer):
-    def __init__(self):
-        self._name = 'lstm'
-
-    def build_model(self, units, dropout=0.5):
-        self.units = units
-        self.model = build_lstm(self.vocab_size + 1, self.seq_len, units, self.embed_matrix)
-        self.model.compile(optimizer='adam', loss='sparse_categorical_crossentropy')
-
-    def train(self, epochs, batch_size=32, verbose=1, validation_split=0.1):
-        self._setup_callbacks()
-        self.model.fit(x=[self.source_in, self.target_in],
-                       y=self.target_out,
-                       batch_size=batch_size,
-                       epochs=epochs,
-                       verbose=verbose,
-                       validation_split=validation_split,
-                       callbacks=self.callbacks)
-
-
-class GRUTrainer(Trainer):
+class GRUPipeline(Pipeline):
     def __init__(self):
         self._name = 'gru'
 
@@ -98,8 +78,7 @@ class GRUTrainer(Trainer):
                        callbacks=self.callbacks)
 
     # todo: change greedy algorithm to beam search
-    # todo: fix insane, seemingly non-deterministic complaints about retracing
-    def predict_seq(self, seq, max_len=200):
+    def predict_seq(self, seq, max_len=100):
         num_padding = self.seq_len - len(seq) - 2
         start_token = self.tokenizer.word_index['<start>']
         end_token = self.tokenizer.word_index['<end>']
@@ -107,18 +86,27 @@ class GRUTrainer(Trainer):
         assert len(seq) == self.seq_len
 
         state = self.enc_model.predict([seq])
-        # output = tf.constant([[self.tokenizer.word_index['<start>']]])
-        output = np.array([[self.tokenizer.word_index['<start>']]])
+        output = tf.constant([[self.tokenizer.word_index['<start>']]])
+
         for i in tf.range(tf.constant(max_len)):
             i = tf.constant(i)
+
+            # next line is also partly responsible for warning
             out, state = self.dec_model.predict([output, state])
+
             next_token = np.argmax(out)
             token_tensor = tf.constant([[next_token]])
+            
+            # todo: next line causes insane, seemingly non-deterministic complaints about retracing
             output = tf.concat([output, token_tensor], axis=1)
+            
             if next_token == self.tokenizer.word_index['<end>']:
                 break
 
         return output
+
+    def predict(self, text, max_len=100):
+        pass
 
 
 if __name__ == '__main__':

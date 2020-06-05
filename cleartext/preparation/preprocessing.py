@@ -18,7 +18,7 @@ def clean(sentence):
     return sentence
 
 
-def prepare(df, tokenizer, seq_len='max'):
+def preprocess(df, tokenizer, seq_len='max'):
     # clean
     df = df.applymap(clean)
 
